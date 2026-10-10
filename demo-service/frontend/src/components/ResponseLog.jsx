@@ -1,0 +1,1 @@
+export default function ResponseLog({logs}){return <section className="card"><h2>Response log</h2>{logs.length?logs.map((x,i)=><div className="log-row" key={i}><code>{x.method}</code><span>{x.path}</span><b className={x.status>=400?"bad":"good"}>{x.status}</b><small>{x.duration} ms</small></div>):<p className="muted">Requests will appear here.</p>}</section>}
