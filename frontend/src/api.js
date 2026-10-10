@@ -1,6 +1,8 @@
 import axios from "axios";
 
-const api = axios.create({ baseURL: "http://localhost:5000/api" });
+const API_BASE = import.meta.env.VITE_API_URL || "https://memoryops-f8ru.onrender.com/api";
+
+const api = axios.create({ baseURL: API_BASE });
 
 export const getScenarios = () => api.get("/simulate").then((r) => r.data);
 export const simulate = (key) => api.post(`/simulate/${key}`).then((r) => r.data);

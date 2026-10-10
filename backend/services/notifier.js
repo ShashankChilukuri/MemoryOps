@@ -249,12 +249,32 @@ export async function notifyIncident(incidentInput, { force = false } = {}) {
     return incident;
   }
 
-  const port = Number(process.env.SMTP_PORT) || 587;
-  const secure = port === 465;
+  let host = process.env.SMTP_HOST;
+  let port = Number(process.env.SMTP_PORT) || 587;
+  let secure = port === 465;
+  let tlsConfig = undefined;
+
+  // Gmail and cloud SMTP optimization: prefer port 465 with IPv4 resolution to avoid network resets
+  if (host && (host.includes("gmail") || port === 465)) {
+    port = 465;
+    secure = true;
+    try {
+      const dns = await import("dns");
+      const ips = await dns.promises.resolve4(host);
+      if (ips && ips.length > 0) {
+        tlsConfig = { servername: host };
+        host = ips[0];
+      }
+    } catch (dnsErr) {
+      // fallback to original host
+    }
+  }
+
   const transportConfig = {
-    host: process.env.SMTP_HOST,
+    host,
     port,
     secure,
+    tls: tlsConfig,
   };
   if (process.env.SMTP_USER || process.env.SMTP_PASS) {
     transportConfig.auth = {
