@@ -8,6 +8,3 @@ export const getIncidents = () => api.get("/incidents").then((r) => r.data);
 export const diagnose = (id) => api.post(`/incidents/${id}/diagnose`).then((r) => r.data);
 export const resolve = (id, body) => api.post(`/incidents/${id}/resolve`, body).then((r) => r.data);
 export const clearIncidents = () => api.delete("/incidents").then((r) => r.data);
-export const sendFeedback = (id, body) => api.post(`/incidents/${id}/feedback`, body).then((r) => r.data);
-export const getMetrics = () => api.get("/metrics").then((r) => r.data);
-export const notifyIncident = (id) => api.post(`/incidents/${id}/notify`).then((r) => r.data);

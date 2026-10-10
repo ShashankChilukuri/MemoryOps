@@ -1,8 +1,0 @@
-{
-  "payment-service": [
-    "payments-oncall@example.com"
-  ],
-  "order-service": [
-    "orders-team@example.com"
-  ]
-}
