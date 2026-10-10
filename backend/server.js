@@ -1,55 +1,50 @@
+import "dotenv/config";
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import dotenv from "dotenv";
 import incidentRoutes from "./routes/incidents.js";
 import simulateRoutes from "./routes/simulate.js";
-
-import { retainIncident, recallSimilar } from "./services/hindsight.js";
-dotenv.config();
+import logRoutes from "./routes/logs.js";
+import metricRoutes from "./routes/metrics.js";
 
 const app = express();
+
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));
+
+// Routes
 app.use("/api/simulate", simulateRoutes);
 app.use("/api/incidents", incidentRoutes);
+app.use("/api/logs", logRoutes);
+app.use("/api/metrics", metricRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", service: "memoryops" });
 });
-import Incident from "./models/Incident.js";
 
-app.get("/api/incidents", async (req, res) => {
-  res.json(await Incident.find().sort({ createdAt: -1 }));
+// Final error handler returning { error: message }
+app.use((err, req, res, next) => {
+  console.error("Server error:", err);
+  const status = err.status && typeof err.status === "number" ? err.status : 500;
+  res.status(status).json({ error: err.message || "Internal server error" });
 });
+
 const PORT = process.env.PORT || 5000;
 
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("MongoDB connected");
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  })
-  .catch((err) => {
-    console.error("MongoDB connection failed:", err.message);
-    process.exit(1);
-  });
+if (process.env.MONGO_URI) {
+  mongoose
+    .connect(process.env.MONGO_URI)
+    .then(() => {
+      console.log("MongoDB connected");
+      app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    })
+    .catch((err) => {
+      console.error("MongoDB connection failed:", err.message);
+      process.exit(1);
+    });
+} else {
+  console.warn("MONGO_URI not set. Server listening without DB connection on port", PORT);
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
 
-
-
-app.post("/api/test/retain/:id", async (req, res) => {
-  const incident = await Incident.findById(req.params.id);
-  res.json(await retainIncident(incident));
-});
-
-app.get("/api/test/recall/:id", async (req, res) => {
-  const incident = await Incident.findById(req.params.id);
-  res.json(await recallSimilar(incident));
-});
-app.get("/api/test/groq-models", async (req, res) => {
-  const r = await fetch("https://api.groq.com/openai/v1/models", {
-    headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}` },
-  });
-  const data = await r.json();
-  res.json((data.data || []).map((m) => m.id));
-});
+export default app;
