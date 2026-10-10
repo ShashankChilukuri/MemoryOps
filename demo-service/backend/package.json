@@ -1,1 +1,19 @@
-{"name":"memoryops-demo-backend","version":"1.0.0","private":true,"type":"module","scripts":{"start":"node server.js","dev":"node --watch server.js"},"dependencies":{"cors":"^2.8.5","dotenv":"^16.4.7","express":"^4.21.2","mongodb":"^6.12.0"}}
+{
+  "name": "demo-service-backend",
+  "version": "1.0.0",
+  "description": "Demo service that produces real logs from injected faults, plus a log shipper for MemoryOps",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "shipper": "node shipper.js",
+    "traffic": "node traffic.js"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "mongodb": "^6.8.0"
+  }
+}
